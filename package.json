@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/mkchung8/bamazon/issues"
   },
-  "homepage": "https://github.com/mkchung8/bamazon#readme"
+  "homepage": "https://github.com/mkchung8/bamazon#readme",
+  "dependencies": {
+    "mysql": "^2.17.1"
+  }
 }
