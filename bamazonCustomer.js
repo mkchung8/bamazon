@@ -1,7 +1,7 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 var cartArr = [];
-
+var totalArr = [];
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -24,7 +24,7 @@ function startScreen() {
                 type: "list",
                 name: "doWhat",
                 message: "Welcome to Bamazon Customer Interface. What would you like to do?",
-                choices: ["View Items For Sale", "Search For Item", "Contact Us"]
+                choices: ["View Items For Sale", "Search For Item", "Contact Us", "Exit"]
             }
         ])
         .then(function (answer) {
@@ -38,6 +38,9 @@ function startScreen() {
                     break;
                 case "Contact Us":
                     contactUs();
+                    break;
+                case "Exit":
+                    connection.end();
                     break;
             }
 
@@ -96,54 +99,76 @@ function searchItems() {
             connection.query(query, post, function (error, results) {
                 if (error) throw error;
 
-                if (results[0].stock_quantity === 0){
+                if (results[0].stock_quantity === 0) {
                     console.log("Sorry, out of stock!");
                     searchItems();
                 }
 
-                if (input.quantity > results[0].stock_quantity){
+                if (input.quantity > results[0].stock_quantity) {
                     console.log("Insufficient Quantity!");
                     searchItems();
                 } else {
-                    addToCart(input.itemId);
+                    addToCart(input.itemId, results[0].product_name, input.quantity);
                     inquirer
                         .prompt([
                             {
-                                type: "list", 
-                                name: "action", 
-                                message: "What would you like to do?", 
-                                choices: ["Add Another Item", "View Items For Sale", "Checkout"]
+                                type: "list",
+                                name: "action",
+                                message: "What would you like to do?",
+                                choices: ["Add Another Item", "View Items For Sale", "Checkout", "Exit"]
                             }
                         ])
-                        .then(function(response) {
+                        .then(function (response) {
                             switch (response.action) {
-                                case 'Add Another Item': 
-                                searchItems();
-                                break;
+                                case 'Add Another Item':
+                                    searchItems();
+                                    break;
                                 case 'View Items For Sale':
-                                viewAllItems();
-                                break;
-                                case 'Checkout': 
-                                checkOut();
-                                break;
+                                    viewAllItems();
+                                    break;
+                                case 'Checkout':
+                                    checkOut();
+                                    break;
+                                case 'Exit':
+                                    connection.end();
+                                    break;
                             }
                         });
                 };
 
-        
+
             });
         });
 
 
 };
 
-function addToCart(item) {
-    cartArr.push(item);
+function addToCart(id, name, quantity) {
+    var checkoutObj = { idItem: id, quantityItem: quantity };
+    cartArr.push(checkoutObj)
+    console.log(`${name} added to your cart!`);
     console.log(cartArr);
 };
 
 function checkOut() {
-    console.log("checkOut Function Execute")
+    console.log("checkOut Function Execute");
+
+    for (var i = 0; i < cartArr.length; i++) {
+        let query = "UPDATE products SET ? WHERE ?";
+        let properties = [
+            {
+                
+            },
+            {
+
+            }
+        ];
+        connection.query(query, properties, function(error){
+            if (error) throw error; 
+            
+        });
+    }
+
 };
 
 function contactUs() {
