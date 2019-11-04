@@ -160,10 +160,7 @@ function addToCart(id, name, quantity, price, quantityStocked) {
     console.log(cartArr);
 };
 
-function updateCart(i, quantityAdd) {
-    cartArr[i].quantityItem += quantityAdd;
-    console.log("Cart has been updated!")
-}
+
 
 function checkOut() {
     console.log("checkOut Function Execute");
@@ -171,12 +168,16 @@ function checkOut() {
     for (var i = 0; i < totalArr.length; i++) {
         total += totalArr[i];
     }
-    console.log(`TOTAL: ${total}`);
+   
     for (var j = 0; j < cartArr.length; j++) {
-        let value = cartArr[i].quantityStocked - cartArr[i].quantityItem;
-        connection.query("UPDATE products SET ? WHERE ?", [{ stock_quantity: value }, { item_id: cartArr[i].idItem }], function (error, results) {
+        let qt = cartArr[j].quantityItem; 
+        let id = cartArr[j].idItem;
+        let mysqlQuery = `UPDATE products SET stock_quantity = stock_quantity - ${qt} WHERE item_id = ${id}`
+        connection.query(mysqlQuery, function (error, results) {
             if (error) throw error;
             console.log("Inventory Updated")
+            console.log(`TOTAL: ${total}`);
+            startScreen();
         })
     }
 

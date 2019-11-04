@@ -113,5 +113,50 @@ function addInventory() {
 };
 
 function addNewProduct() {
-    
+
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "name",
+            message: "Enter the name of New Product"
+        },
+        {
+            type: "input",
+            name: "dept",
+            message: "Enter the department of New Product"
+        },
+        {
+            type: "input",
+            name: "id",
+            message: "Enter the ID number of New Product"
+        },
+        {
+            type: "input",
+            name: "price",
+            message: "Enter the price of New Product"
+        },
+        {
+            type: "input",
+            name: "amount",
+            message: "Enter the quantity of New Product"
+        }
+    ]).then(function(input){
+        let idInput = parseInt(input.id); 
+        let priceInput = parseFloat(input.price); 
+        let quantityInput = parseInt(input.amount);
+        let mysqlQuery = `INSERT INTO products SET ?`;
+        let mysqlObj = {
+            item_id: idInput, 
+            product_name: input.name,
+            department_name: input.dept, 
+            price: priceInput,
+            stock_quantity: quantityInput  
+        }
+        connection.query(mysqlQuery, mysqlObj, function(error, res) {
+            if (error) throw error; 
+            console.log(`New Product Successfully Added!`);
+            startScreen(); 
+        })
+
+    }); 
 };
