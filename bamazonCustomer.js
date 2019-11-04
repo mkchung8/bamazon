@@ -1,7 +1,9 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
+
 var cartArr = [];
 var totalArr = [];
+
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -15,7 +17,7 @@ connection.connect(function (err) {
         console.error(err);
     }
     startScreen();
-})
+});
 
 function startScreen() {
     inquirer
@@ -63,7 +65,7 @@ function viewAllItems() {
             `);
         }
         searchItems();
-    })
+    });
 
 };
 
@@ -94,7 +96,7 @@ function searchItems() {
             }
         ])
         .then(function (input) {
-            let query = "SELECT item_id, product_name, stock_quantity FROM products WHERE ?";
+            let query = "SELECT item_id, product_name, stock_quantity, price FROM products WHERE ?";
             let post = { item_id: input.itemId };
             connection.query(query, post, function (error, results) {
                 if (error) throw error;
@@ -108,7 +110,10 @@ function searchItems() {
                     console.log("Insufficient Quantity!");
                     searchItems();
                 } else {
-                    addToCart(input.itemId, results[0].product_name, input.quantity);
+
+                    addToCart(input.itemId, results[0].product_name, input.quantity, results[0].price);
+
+
                     inquirer
                         .prompt([
                             {
@@ -134,6 +139,8 @@ function searchItems() {
                                     break;
                             }
                         });
+
+
                 };
 
 
@@ -143,30 +150,34 @@ function searchItems() {
 
 };
 
-function addToCart(id, name, quantity) {
-    var checkoutObj = { idItem: id, quantityItem: quantity };
-    cartArr.push(checkoutObj)
+function addToCart(id, name, quantity, price, quantityStocked) {
+
+    var checkoutObj = { idItem: parseInt(id), quantityItem: parseInt(quantity), priceItem: parseInt(price) };
+    cartArr.push(checkoutObj);
+    let subTotal = price * quantity;
+    totalArr.push(subTotal);
     console.log(`${name} added to your cart!`);
     console.log(cartArr);
 };
 
+function updateCart(i, quantityAdd) {
+    cartArr[i].quantityItem += quantityAdd;
+    console.log("Cart has been updated!")
+}
+
 function checkOut() {
     console.log("checkOut Function Execute");
-
-    for (var i = 0; i < cartArr.length; i++) {
-        let query = "UPDATE products SET ? WHERE ?";
-        let properties = [
-            {
-                
-            },
-            {
-
-            }
-        ];
-        connection.query(query, properties, function(error){
-            if (error) throw error; 
-            
-        });
+    let total = 0;
+    for (var i = 0; i < totalArr.length; i++) {
+        total += totalArr[i];
+    }
+    console.log(`TOTAL: ${total}`);
+    for (var j = 0; j < cartArr.length; j++) {
+        let value = cartArr[i].quantityStocked - cartArr[i].quantityItem;
+        connection.query("UPDATE products SET ? WHERE ?", [{ stock_quantity: value }, { item_id: cartArr[i].idItem }], function (error, results) {
+            if (error) throw error;
+            console.log("Inventory Updated")
+        })
     }
 
 };
