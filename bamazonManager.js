@@ -41,8 +41,8 @@ function startScreen() {
                 case 'Add New Product':
                     addNewProduct();
                     break;
-                case 'Exit': 
-                    connection.end(); 
+                case 'Exit':
+                    connection.end();
                     break;
             }
         })
@@ -88,7 +88,7 @@ function addInventory() {
     inquirer
         .prompt([
             {
-                type: "input", 
+                type: "input",
                 name: "itemId",
                 message: "Enter the ID of the item you wish to add."
             },
@@ -98,16 +98,26 @@ function addInventory() {
                 message: "Enter the quantity of this item you are adding."
             }
         ])
-        .then(function(input){
-            let qt = parseInt(input.itemQuantity); 
+        .then(function (input) {
+            let qt = parseInt(input.itemQuantity);
             console.log(qt)
             let id = parseInt(input.itemId);
             let mysqlQuery = `UPDATE products SET stock_quantity = stock_quantity + ${qt} WHERE item_id = ${id}`
-            connection.query(mysqlQuery, function(error, response){
-                if (error) throw error; 
-                console.log(response);
-                console.log(`Inventory Successfully Updated`);
-                startScreen();
+            connection.query(mysqlQuery, function (error, response) {
+                if (error) throw error;
+                
+                if (response.changedRows === 0) {
+                    console.log(`
+                    Sorry, the item ID you entered does not exist in the inventory. Try again.
+                    `); 
+                    addInventory();
+                } else {
+                    console.log(`
+                    Inventory Successfully Updated!!!
+                    `);
+                    startScreen();
+                }
+
             })
         });
 };
@@ -140,23 +150,23 @@ function addNewProduct() {
             name: "amount",
             message: "Enter the quantity of New Product"
         }
-    ]).then(function(input){
-        let idInput = parseInt(input.id); 
-        let priceInput = parseFloat(input.price); 
+    ]).then(function (input) {
+        let idInput = parseInt(input.id);
+        let priceInput = parseFloat(input.price);
         let quantityInput = parseInt(input.amount);
         let mysqlQuery = `INSERT INTO products SET ?`;
         let mysqlObj = {
-            item_id: idInput, 
+            item_id: idInput,
             product_name: input.name,
-            department_name: input.dept, 
+            department_name: input.dept,
             price: priceInput,
-            stock_quantity: quantityInput  
+            stock_quantity: quantityInput
         }
-        connection.query(mysqlQuery, mysqlObj, function(error, res) {
-            if (error) throw error; 
+        connection.query(mysqlQuery, mysqlObj, function (error, res) {
+            if (error) throw error;
             console.log(`New Product Successfully Added!`);
-            startScreen(); 
+            startScreen();
         })
 
-    }); 
+    });
 };

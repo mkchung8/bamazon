@@ -212,4 +212,5 @@ function contactUs() {
     Phone Number: 1-800-BAMAZON
     Website: www.bamazon.com 
     `)
+    startScreen(); 
 };
