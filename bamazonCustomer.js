@@ -103,16 +103,22 @@ function searchItems() {
 
                 if (results[0].stock_quantity === 0) {
                     console.log("Sorry, out of stock!");
-                    searchItems();
+                    return searchItems();
                 }
 
-                if (input.quantity > results[0].stock_quantity) {
+                if ((input.quantity > results[0].stock_quantity) && (results[0].stock_quantity > 0)) {
                     console.log("Insufficient Quantity!");
-                    searchItems();
+                    return searchItems();
+
                 } else {
-
-                    addToCart(input.itemId, results[0].product_name, input.quantity, results[0].price);
-
+                    if (cartArr.some(item => item.idItem === parseInt(input.itemId))) {
+                        let id = parseInt(input.itemId); 
+                        let qt = parseInt(input.quantity);
+                        let index = cartArr.findIndex(x => x.idItem === id);
+                        updateCart(qt, index);
+                    } else {
+                        addToCart(input.itemId, results[0].product_name, input.quantity, results[0].price);
+                    }
 
                     inquirer
                         .prompt([
@@ -156,30 +162,46 @@ function addToCart(id, name, quantity, price, quantityStocked) {
     cartArr.push(checkoutObj);
     let subTotal = price * quantity;
     totalArr.push(subTotal);
-    console.log(`${name} added to your cart!`);
-    console.log(cartArr);
+    console.log(`
+    ${name} added to your cart!
+    `);
 };
 
+function updateCart(qt, index) {
+    
+    
+    let qtUpdated = cartArr[index].quantityItem + qt; 
+    cartArr[index].quantityItem = qtUpdated; 
+    console.log(cartArr[index].quantityItem);
+    console.log("Cart has been updated!");
+
+}
 
 
 function checkOut() {
-    console.log("checkOut Function Execute");
+
     let total = 0;
     for (var i = 0; i < totalArr.length; i++) {
         total += totalArr[i];
     }
-   
+    
     for (var j = 0; j < cartArr.length; j++) {
-        let qt = cartArr[j].quantityItem; 
+        let qt = cartArr[j].quantityItem;
         let id = cartArr[j].idItem;
         let mysqlQuery = `UPDATE products SET stock_quantity = stock_quantity - ${qt} WHERE item_id = ${id}`
         connection.query(mysqlQuery, function (error, results) {
             if (error) throw error;
-            console.log("Inventory Updated")
-            console.log(`TOTAL: ${total}`);
-            startScreen();
+            
+            return; 
+            
         })
     }
+
+    console.log(`
+    Inventory has successfully been updated!!!
+    TOTAL PURCHASE AMOUNT: ${total}
+    `);
+    startScreen(); 
 
 };
 

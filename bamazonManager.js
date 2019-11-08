@@ -13,7 +13,7 @@ connection.connect(function (err) {
     if (err) {
         console.error(err);
     }
-    console.log("Welcome to Bamazon Manager Interface");
+    console.log("Welcome to the Bamazon Manager Interface");
     setTimeout(startScreen, 2000);
 });
 
